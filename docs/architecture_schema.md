@@ -28,7 +28,7 @@ graph TB
         MINIAPP_SETTINGS[⚙️ Настройки]
         MINIAPP_CONTEXT[🧹 Очистка контекста]
         MINIAPP_ROLES[🎭 Управление ролями]
-        MINIAPP_SURF[🌐 Web-поиск (Surf)]
+        MINIAPP_SURF[🌐 Web-поиск Surf]
         MINIAPP_TTS[🔊 Text-to-Speech]
         MINIAPP_IMAGE[🎨 Генерация изображений]
         MINIAPP_SERVICES[🛠️ Доп. сервисы]
