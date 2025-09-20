@@ -18,8 +18,8 @@ graph TB
 
     %% Основное приложение
     subgraph "Основное приложение"
-        MAIN[🤖 bot/main.py<br/>Главный обработчик]
-        HANDLERS[📋 handlers/<br/>Обработчики команд]
+        MAIN[🤖 bot main.py<br/>Главный обработчик]
+        HANDLERS[📋 handlers<br/>Обработчики команд]
         RUN[▶️ run.py<br/>Точка входа]
     end
 
@@ -45,7 +45,7 @@ graph TB
     %% Система обработки сообщений
     subgraph "Обработка сообщений"
         CONTENT[📝 Content Handlers<br/>text, photo, voice, etc.]
-        COMMANDS[⚡ Command Handlers<br/>/image, /surf, /talk, /role]
+        COMMANDS[⚡ Command Handlers<br/>image, surf, talk, role]
         CALLBACKS[🔘 Callback Handlers<br/>Inline кнопки]
         ONBOARDING[🎯 Onboarding System<br/>GIF + Tutorial]
     end
@@ -90,9 +90,9 @@ graph TB
 
     %% Аналитика и мониторинг
     subgraph "Аналитика"
-        ANALYTICS[📈 Анализ данных<br/>analisys/]
+        ANALYTICS[📈 Анализ данных<br/>analisys]
         LOGS[📝 Логирование<br/>security.log]
-        MONITORING[👀 Мониторинг<br/>bureau/]
+        MONITORING[👀 Мониторинг<br/>bureau]
     end
 
     %% Система генерации документов
@@ -101,7 +101,7 @@ graph TB
         EXCEL_GEN[📊 Excel Generator]
         PDF_GEN[📄 PDF Generator]
         DOCX_GEN[📝 DOCX Generator]
-        TABLE_PARSER[📋 Table Parser<br/>Legacy | символы]
+        TABLE_PARSER[📋 Table Parser<br/>Legacy pipe символы]
     end
 
     %% Система тарифов и онбординга
@@ -115,7 +115,7 @@ graph TB
 
     %% Дополнительные сервисы
     subgraph "Внешние сервисы"
-        INVOICE[🧾 Чеки ОФД<br/>invoice_mh/]
+        INVOICE[🧾 Чеки ОФД<br/>invoice_mh]
         YOUTUBE[📺 YouTube QA]
     end
 
@@ -234,7 +234,7 @@ sequenceDiagram
         TG->>M: Команда старт
         M->>H: Onboarding Handler
         H->>TG: GIF + Tutorial
-        H->>DB: Создать Trial период (3 дня)
+        H->>DB: Создать Trial период 3 дня
         TG->>U: Приветствие + Trial активирован
     else Чат с ИИ
         U->>TG: Отправляет сообщение
@@ -270,7 +270,7 @@ sequenceDiagram
     else Оплата подписки
         U->>TG: Выбор тарифа
         H->>DB: Проверить подписку
-        H->>TG: Инвойс (99/199/399/1890₽)
+        H->>TG: Инвойс 99/199/399/1890₽
         TG-->>H: Успешная оплата
         H->>DB: Начислить подписку
         H->>TG: Подтверждение активации
@@ -298,7 +298,7 @@ graph TB
     end
 
     subgraph "Onboarding система"
-        START_CMD[▶️ /start команда]
+        START_CMD[▶️ start команда]
         WELCOME_GIF[🎬 Приветственный GIF]
         TUTORIAL[📚 Короткий туториал]
         TRIAL_ACTIVATION[🎯 Активация Trial]
@@ -429,7 +429,7 @@ graph TB
     subgraph "Входные данные"
         AI_RESPONSE[🧠 Ответ ИИ]
         USER_REQUEST[👤 Запрос пользователя]
-        LEGACY_PARSER[📋 Legacy парсер<br/>Символы | в тексте]
+        LEGACY_PARSER[📋 Legacy парсер<br/>Символы pipe в тексте]
     end
 
     subgraph "Система обработки"
