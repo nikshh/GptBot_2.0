@@ -84,6 +84,26 @@ graph TB
         GLOBAL[🌐 Global.py<br/>Глобальное состояние]
         CONTEXT_MANAGER[🧠 Context Manager<br/>Управление историей ИИ]
         SYSTEM_PROMPTS[⚙️ System Prompts<br/>Командные промпты]
+        MULTIMODAL_CONTEXT[🎭 Multimodal Context<br/>Мультимодальный контекст]
+        CHAT_MODES[🔄 Chat Modes<br/>Режимы чата]
+    end
+
+    %% Режимы работы чата
+    subgraph "Режимы чата"
+        NORMAL_CHAT[💬 Обычный чат<br/>Стандартное общение]
+        DOCUMENT_CHAT[📄 Чат с документом<br/>Работа с файлами]
+        IMAGE_CHAT[🖼️ Чат с изображением<br/>Анализ картинок]
+        VOICE_CHAT[🎤 Голосовой чат<br/>Речевое взаимодействие]
+        MODE_SWITCHER[🔀 Переключатель режимов<br/>Автоматическое определение]
+    end
+
+    %% Система работы с документами
+    subgraph "Работа с документами"
+        DOC_SESSION[📋 Document Session<br/>Сессия работы с документом]
+        DOC_EDITOR[✏️ Document Editor<br/>Редактирование документа]
+        DOC_QA[❓ Document Q&A<br/>Вопросы по документу]
+        DOC_ANALYZER[🔍 Document Analyzer<br/>Анализ содержимого]
+        DOC_VERSIONING[📚 Document Versioning<br/>Версионирование изменений]
     end
 
     %% Векторные базы знаний
@@ -224,8 +244,35 @@ graph TB
     HANDLERS --> CONTEXT_MANAGER
     CONTEXT_MANAGER --> REDIS
     CONTEXT_MANAGER --> SYSTEM_PROMPTS
+    CONTEXT_MANAGER --> MULTIMODAL_CONTEXT
+    CONTEXT_MANAGER --> CHAT_MODES
     SYSTEM_PROMPTS --> OPENAI
     SYSTEM_PROMPTS --> CLAUDE
+
+    %% Мультимодальный контекст
+    TEXT_HANDLER --> MULTIMODAL_CONTEXT
+    VOICE_HANDLER --> MULTIMODAL_CONTEXT
+    PHOTO_HANDLER --> MULTIMODAL_CONTEXT
+    DOC_HANDLER --> MULTIMODAL_CONTEXT
+
+    %% Режимы чата
+    CHAT_MODES --> MODE_SWITCHER
+    MODE_SWITCHER --> NORMAL_CHAT
+    MODE_SWITCHER --> DOCUMENT_CHAT
+    MODE_SWITCHER --> IMAGE_CHAT
+    MODE_SWITCHER --> VOICE_CHAT
+
+    %% Работа с документами
+    DOC_HANDLER --> DOC_SESSION
+    DOC_SESSION --> DOC_EDITOR
+    DOC_SESSION --> DOC_QA
+    DOC_SESSION --> DOC_ANALYZER
+    DOC_SESSION --> DOC_VERSIONING
+    
+    %% Связи документного режима с ИИ
+    DOC_QA --> OPENAI
+    DOC_ANALYZER --> OPENAI
+    DOC_EDITOR --> OPENAI
 
     %% Связи с системой оплаты
     CALLBACKS --> YOOKASSA
@@ -302,6 +349,8 @@ graph TB
     classDef contextClass fill:#fce4ec,stroke:#ad1457,stroke-width:2px
     classDef knowledgeClass fill:#e0f2f1,stroke:#00695c,stroke-width:2px
     classDef ragClass fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    classDef modeClass fill:#e8eaf6,stroke:#5c6bc0,stroke-width:2px
+    classDef docClass2 fill:#f3e5f5,stroke:#8e24aa,stroke-width:2px
     
     class U1,U2 userClass
     class MAIN,HANDLERS,RUN,ONBOARDING botClass
@@ -314,9 +363,11 @@ graph TB
     class DOC_PROCESSOR,EXCEL_GEN,PDF_GEN,DOCX_GEN,TABLE_PARSER docClass
     class TEXT_HANDLER,VOICE_HANDLER,PHOTO_HANDLER,DOC_HANDLER,VIDEO_HANDLER,STICKER_HANDLER handlerClass
     class STT_ENGINE,TTS_ENGINE,VISION_ENGINE,DOC_PARSER_ENGINE engineClass
-    class CONTEXT_MANAGER,SYSTEM_PROMPTS contextClass
+    class CONTEXT_MANAGER,SYSTEM_PROMPTS,MULTIMODAL_CONTEXT,CHAT_MODES contextClass
     class USER_KNOWLEDGE,COMPANY_KNOWLEDGE,VECTOR_SEARCH,EMBEDDINGS knowledgeClass
     class KNOWLEDGE_EXTRACTOR,USER_PROFILER,FALLBACK_SEARCH,RAG_SYSTEM ragClass
+    class NORMAL_CHAT,DOCUMENT_CHAT,IMAGE_CHAT,VOICE_CHAT,MODE_SWITCHER modeClass
+    class DOC_SESSION,DOC_EDITOR,DOC_QA,DOC_ANALYZER,DOC_VERSIONING docClass2
 ```
 
 ## Детализация системы обработки сообщений
@@ -763,6 +814,225 @@ sequenceDiagram
     end
 ```
 
+## Система режимов чата и мультимодального контекста
+
+```mermaid
+graph TB
+    subgraph "Входящий контент"
+        TEXT_INPUT[📝 Текстовый ввод]
+        VOICE_INPUT[🎤 Голосовой ввод]
+        IMAGE_INPUT[🖼️ Изображение]
+        DOC_INPUT[📄 Документ]
+    end
+
+    subgraph "Определение режима"
+        CONTENT_DETECTOR[🔍 Content Detector<br/>Определение типа контента]
+        MODE_SELECTOR[🎯 Mode Selector<br/>Выбор режима чата]
+        CONTEXT_ANALYZER[🧠 Context Analyzer<br/>Анализ текущего контекста]
+    end
+
+    subgraph "Режимы чата"
+        NORMAL_MODE[💬 Обычный режим<br/>Стандартное общение]
+        DOC_MODE[📄 Документный режим<br/>Работа с файлом]
+        IMAGE_MODE[🖼️ Режим изображений<br/>Анализ картинок]
+        VOICE_MODE[🎤 Голосовой режим<br/>Речевое общение]
+    end
+
+    subgraph "Мультимодальный контекст"
+        CONTEXT_MEMORY[🧠 Context Memory<br/>Память контекста]
+        MULTIMODAL_HISTORY[📚 Multimodal History<br/>История всех типов контента]
+        CONTEXT_FUSION[🔗 Context Fusion<br/>Объединение контекстов]
+        RELEVANCE_TRACKER[📊 Relevance Tracker<br/>Отслеживание релевантности]
+    end
+
+    %% Определение режима
+    TEXT_INPUT --> CONTENT_DETECTOR
+    VOICE_INPUT --> CONTENT_DETECTOR
+    IMAGE_INPUT --> CONTENT_DETECTOR
+    DOC_INPUT --> CONTENT_DETECTOR
+
+    CONTENT_DETECTOR --> MODE_SELECTOR
+    CONTEXT_ANALYZER --> MODE_SELECTOR
+
+    %% Переключение режимов
+    MODE_SELECTOR --> NORMAL_MODE
+    MODE_SELECTOR --> DOC_MODE
+    MODE_SELECTOR --> IMAGE_MODE
+    MODE_SELECTOR --> VOICE_MODE
+
+    %% Формирование контекста
+    TEXT_INPUT --> MULTIMODAL_HISTORY
+    VOICE_INPUT --> MULTIMODAL_HISTORY
+    IMAGE_INPUT --> MULTIMODAL_HISTORY
+    DOC_INPUT --> MULTIMODAL_HISTORY
+
+    MULTIMODAL_HISTORY --> CONTEXT_MEMORY
+    CONTEXT_MEMORY --> CONTEXT_FUSION
+    CONTEXT_FUSION --> RELEVANCE_TRACKER
+
+    %% Обратная связь с анализатором
+    RELEVANCE_TRACKER --> CONTEXT_ANALYZER
+
+    %% Стили
+    classDef inputClass fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef detectorClass fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef modeClass fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef contextClass fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    
+    class TEXT_INPUT,VOICE_INPUT,IMAGE_INPUT,DOC_INPUT inputClass
+    class CONTENT_DETECTOR,MODE_SELECTOR,CONTEXT_ANALYZER detectorClass
+    class NORMAL_MODE,DOC_MODE,IMAGE_MODE,VOICE_MODE modeClass
+    class CONTEXT_MEMORY,MULTIMODAL_HISTORY,CONTEXT_FUSION,RELEVANCE_TRACKER contextClass
+```
+
+## Детальная схема работы с документами
+
+```mermaid
+graph TB
+    subgraph "Загрузка документа"
+        DOC_UPLOAD[📤 Загрузка документа<br/>PDF, DOCX, TXT, etc.]
+        DOC_VALIDATION[✅ Валидация<br/>Проверка формата и размера]
+        DOC_PARSING[📋 Парсинг<br/>Извлечение текста и структуры]
+        DOC_INDEXING[🔍 Индексация<br/>Создание поисковых индексов]
+    end
+
+    subgraph "Режим чата с документом"
+        DOC_SESSION_MGR[📋 Session Manager<br/>Управление сессией]
+        DOC_CONTEXT[📄 Document Context<br/>Контекст документа]
+        DOC_MEMORY[🧠 Document Memory<br/>Память о документе]
+        SESSION_STATE[⚙️ Session State<br/>Состояние сессии]
+    end
+
+    subgraph "Операции с документом"
+        DOC_QA_ENGINE[❓ Q&A Engine<br/>Вопросы по документу]
+        DOC_EDIT_ENGINE[✏️ Edit Engine<br/>Редактирование документа]
+        DOC_SUMMARY[📊 Summary Engine<br/>Создание резюме]
+        DOC_SEARCH[🔍 Document Search<br/>Поиск по документу]
+    end
+
+    subgraph "Версионирование"
+        VERSION_CONTROL[📚 Version Control<br/>Контроль версий]
+        CHANGE_TRACKER[📝 Change Tracker<br/>Отслеживание изменений]
+        DIFF_ENGINE[🔄 Diff Engine<br/>Сравнение версий]
+        ROLLBACK[↩️ Rollback<br/>Откат изменений]
+    end
+
+    subgraph "Экспорт результатов"
+        DOC_GENERATOR[📄 Document Generator<br/>Генерация документов]
+        FORMAT_CONVERTER[🔄 Format Converter<br/>Конвертация форматов]
+        DOWNLOAD_MANAGER[📥 Download Manager<br/>Управление загрузками]
+    end
+
+    %% Процесс загрузки
+    DOC_UPLOAD --> DOC_VALIDATION
+    DOC_VALIDATION --> DOC_PARSING
+    DOC_PARSING --> DOC_INDEXING
+    DOC_INDEXING --> DOC_SESSION_MGR
+
+    %% Управление сессией
+    DOC_SESSION_MGR --> DOC_CONTEXT
+    DOC_SESSION_MGR --> DOC_MEMORY
+    DOC_SESSION_MGR --> SESSION_STATE
+
+    %% Операции
+    DOC_CONTEXT --> DOC_QA_ENGINE
+    DOC_CONTEXT --> DOC_EDIT_ENGINE
+    DOC_CONTEXT --> DOC_SUMMARY
+    DOC_CONTEXT --> DOC_SEARCH
+
+    %% Версионирование
+    DOC_EDIT_ENGINE --> VERSION_CONTROL
+    VERSION_CONTROL --> CHANGE_TRACKER
+    CHANGE_TRACKER --> DIFF_ENGINE
+    VERSION_CONTROL --> ROLLBACK
+
+    %% Экспорт
+    DOC_EDIT_ENGINE --> DOC_GENERATOR
+    DOC_GENERATOR --> FORMAT_CONVERTER
+    FORMAT_CONVERTER --> DOWNLOAD_MANAGER
+
+    %% Стили
+    classDef uploadClass fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef sessionClass fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef operationClass fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef versionClass fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef exportClass fill:#ffebee,stroke:#c62828,stroke-width:2px
+    
+    class DOC_UPLOAD,DOC_VALIDATION,DOC_PARSING,DOC_INDEXING uploadClass
+    class DOC_SESSION_MGR,DOC_CONTEXT,DOC_MEMORY,SESSION_STATE sessionClass
+    class DOC_QA_ENGINE,DOC_EDIT_ENGINE,DOC_SUMMARY,DOC_SEARCH operationClass
+    class VERSION_CONTROL,CHANGE_TRACKER,DIFF_ENGINE,ROLLBACK versionClass
+    class DOC_GENERATOR,FORMAT_CONVERTER,DOWNLOAD_MANAGER exportClass
+```
+
+## Схема работы режимов чата
+
+```mermaid
+sequenceDiagram
+    participant U as 👤 Пользователь
+    participant MD as 🔍 Mode Detector
+    participant CM as 🧠 Context Manager
+    participant DM as 📄 Document Mode
+    participant IM as 🖼️ Image Mode
+    participant VM as 🎤 Voice Mode
+    participant AI as 🧠 AI Engine
+
+    alt Отправка документа
+        U->>MD: Загружает документ
+        MD->>CM: Переключить в Document Mode
+        CM->>DM: Активировать режим документа
+        DM->>DM: Парсинг и индексация
+        DM->>U: "Документ загружен. Режим работы с документом активирован"
+        
+        loop Работа с документом
+            U->>DM: Вопрос по документу
+            DM->>AI: Запрос с контекстом документа
+            AI-->>DM: Ответ на основе документа
+            DM->>U: Ответ с ссылками на разделы
+            
+            alt Редактирование
+                U->>DM: "Измени раздел X"
+                DM->>AI: Запрос на редактирование
+                AI-->>DM: Предложенные изменения
+                DM->>DM: Создать новую версию
+                DM->>U: Показать изменения + версия
+            end
+        end
+        
+        U->>DM: "Экспортировать документ"
+        DM->>U: Готовый файл для скачивания
+    
+    else Отправка изображения
+        U->>MD: Загружает изображение
+        MD->>CM: Переключить в Image Mode
+        CM->>IM: Активировать режим изображений
+        IM->>AI: Анализ изображения
+        AI-->>IM: Описание изображения
+        IM->>U: Описание + возможности
+        
+        U->>IM: Вопрос об изображении
+        IM->>AI: Запрос с изображением в контексте
+        AI-->>IM: Ответ об изображении
+        IM->>U: Детальный ответ
+    
+    else Голосовое сообщение
+        U->>MD: Отправляет голос
+        MD->>CM: Переключить в Voice Mode
+        CM->>VM: Активировать голосовой режим
+        VM->>AI: Speech-to-Text + анализ
+        AI-->>VM: Текстовый ответ
+        VM->>VM: Text-to-Speech
+        VM->>U: Голосовой ответ
+    
+    else Обычный текст
+        U->>MD: Печатает текст
+        MD->>CM: Обычный режим
+        CM->>AI: Стандартный запрос
+        AI-->>CM: Обычный ответ
+        CM->>U: Текстовый ответ
+    end
+```
+
 ## Система управления контекстом и базами знаний
 
 ```mermaid
@@ -905,5 +1175,224 @@ sequenceDiagram
         else Информация не найдена
             CM-->>U: Извинение + предложение помощи
         end
+    end
+```
+
+## Система режимов чата и мультимодального контекста
+
+```mermaid
+graph TB
+    subgraph "Входящий контент"
+        TEXT_INPUT[📝 Текстовый ввод]
+        VOICE_INPUT[🎤 Голосовой ввод]
+        IMAGE_INPUT[🖼️ Изображение]
+        DOC_INPUT[📄 Документ]
+    end
+
+    subgraph "Определение режима"
+        CONTENT_DETECTOR[🔍 Content Detector<br/>Определение типа контента]
+        MODE_SELECTOR[🎯 Mode Selector<br/>Выбор режима чата]
+        CONTEXT_ANALYZER[🧠 Context Analyzer<br/>Анализ текущего контекста]
+    end
+
+    subgraph "Режимы чата"
+        NORMAL_MODE[💬 Обычный режим<br/>Стандартное общение]
+        DOC_MODE[📄 Документный режим<br/>Работа с файлом]
+        IMAGE_MODE[🖼️ Режим изображений<br/>Анализ картинок]
+        VOICE_MODE[🎤 Голосовой режим<br/>Речевое общение]
+    end
+
+    subgraph "Мультимодальный контекст"
+        CONTEXT_MEMORY[🧠 Context Memory<br/>Память контекста]
+        MULTIMODAL_HISTORY[📚 Multimodal History<br/>История всех типов контента]
+        CONTEXT_FUSION[🔗 Context Fusion<br/>Объединение контекстов]
+        RELEVANCE_TRACKER[📊 Relevance Tracker<br/>Отслеживание релевантности]
+    end
+
+    %% Определение режима
+    TEXT_INPUT --> CONTENT_DETECTOR
+    VOICE_INPUT --> CONTENT_DETECTOR
+    IMAGE_INPUT --> CONTENT_DETECTOR
+    DOC_INPUT --> CONTENT_DETECTOR
+
+    CONTENT_DETECTOR --> MODE_SELECTOR
+    CONTEXT_ANALYZER --> MODE_SELECTOR
+
+    %% Переключение режимов
+    MODE_SELECTOR --> NORMAL_MODE
+    MODE_SELECTOR --> DOC_MODE
+    MODE_SELECTOR --> IMAGE_MODE
+    MODE_SELECTOR --> VOICE_MODE
+
+    %% Формирование контекста
+    TEXT_INPUT --> MULTIMODAL_HISTORY
+    VOICE_INPUT --> MULTIMODAL_HISTORY
+    IMAGE_INPUT --> MULTIMODAL_HISTORY
+    DOC_INPUT --> MULTIMODAL_HISTORY
+
+    MULTIMODAL_HISTORY --> CONTEXT_MEMORY
+    CONTEXT_MEMORY --> CONTEXT_FUSION
+    CONTEXT_FUSION --> RELEVANCE_TRACKER
+
+    %% Обратная связь с анализатором
+    RELEVANCE_TRACKER --> CONTEXT_ANALYZER
+
+    %% Стили
+    classDef inputClass fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef detectorClass fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef modeClass fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef contextClass fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    
+    class TEXT_INPUT,VOICE_INPUT,IMAGE_INPUT,DOC_INPUT inputClass
+    class CONTENT_DETECTOR,MODE_SELECTOR,CONTEXT_ANALYZER detectorClass
+    class NORMAL_MODE,DOC_MODE,IMAGE_MODE,VOICE_MODE modeClass
+    class CONTEXT_MEMORY,MULTIMODAL_HISTORY,CONTEXT_FUSION,RELEVANCE_TRACKER contextClass
+```
+
+## Детальная схема работы с документами
+
+```mermaid
+graph TB
+    subgraph "Загрузка документа"
+        DOC_UPLOAD[📤 Загрузка документа<br/>PDF, DOCX, TXT, etc.]
+        DOC_VALIDATION[✅ Валидация<br/>Проверка формата и размера]
+        DOC_PARSING[📋 Парсинг<br/>Извлечение текста и структуры]
+        DOC_INDEXING[🔍 Индексация<br/>Создание поисковых индексов]
+    end
+
+    subgraph "Режим чата с документом"
+        DOC_SESSION_MGR[📋 Session Manager<br/>Управление сессией]
+        DOC_CONTEXT[📄 Document Context<br/>Контекст документа]
+        DOC_MEMORY[🧠 Document Memory<br/>Память о документе]
+        SESSION_STATE[⚙️ Session State<br/>Состояние сессии]
+    end
+
+    subgraph "Операции с документом"
+        DOC_QA_ENGINE[❓ Q&A Engine<br/>Вопросы по документу]
+        DOC_EDIT_ENGINE[✏️ Edit Engine<br/>Редактирование документа]
+        DOC_SUMMARY[📊 Summary Engine<br/>Создание резюме]
+        DOC_SEARCH[🔍 Document Search<br/>Поиск по документу]
+    end
+
+    subgraph "Версионирование"
+        VERSION_CONTROL[📚 Version Control<br/>Контроль версий]
+        CHANGE_TRACKER[📝 Change Tracker<br/>Отслеживание изменений]
+        DIFF_ENGINE[🔄 Diff Engine<br/>Сравнение версий]
+        ROLLBACK[↩️ Rollback<br/>Откат изменений]
+    end
+
+    subgraph "Экспорт результатов"
+        DOC_GENERATOR[📄 Document Generator<br/>Генерация документов]
+        FORMAT_CONVERTER[🔄 Format Converter<br/>Конвертация форматов]
+        DOWNLOAD_MANAGER[📥 Download Manager<br/>Управление загрузками]
+    end
+
+    %% Процесс загрузки
+    DOC_UPLOAD --> DOC_VALIDATION
+    DOC_VALIDATION --> DOC_PARSING
+    DOC_PARSING --> DOC_INDEXING
+    DOC_INDEXING --> DOC_SESSION_MGR
+
+    %% Управление сессией
+    DOC_SESSION_MGR --> DOC_CONTEXT
+    DOC_SESSION_MGR --> DOC_MEMORY
+    DOC_SESSION_MGR --> SESSION_STATE
+
+    %% Операции
+    DOC_CONTEXT --> DOC_QA_ENGINE
+    DOC_CONTEXT --> DOC_EDIT_ENGINE
+    DOC_CONTEXT --> DOC_SUMMARY
+    DOC_CONTEXT --> DOC_SEARCH
+
+    %% Версионирование
+    DOC_EDIT_ENGINE --> VERSION_CONTROL
+    VERSION_CONTROL --> CHANGE_TRACKER
+    CHANGE_TRACKER --> DIFF_ENGINE
+    VERSION_CONTROL --> ROLLBACK
+
+    %% Экспорт
+    DOC_EDIT_ENGINE --> DOC_GENERATOR
+    DOC_GENERATOR --> FORMAT_CONVERTER
+    FORMAT_CONVERTER --> DOWNLOAD_MANAGER
+
+    %% Стили
+    classDef uploadClass fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef sessionClass fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef operationClass fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef versionClass fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef exportClass fill:#ffebee,stroke:#c62828,stroke-width:2px
+    
+    class DOC_UPLOAD,DOC_VALIDATION,DOC_PARSING,DOC_INDEXING uploadClass
+    class DOC_SESSION_MGR,DOC_CONTEXT,DOC_MEMORY,SESSION_STATE sessionClass
+    class DOC_QA_ENGINE,DOC_EDIT_ENGINE,DOC_SUMMARY,DOC_SEARCH operationClass
+    class VERSION_CONTROL,CHANGE_TRACKER,DIFF_ENGINE,ROLLBACK versionClass
+    class DOC_GENERATOR,FORMAT_CONVERTER,DOWNLOAD_MANAGER exportClass
+```
+
+## Схема работы режимов чата
+
+```mermaid
+sequenceDiagram
+    participant U as 👤 Пользователь
+    participant MD as 🔍 Mode Detector
+    participant CM as 🧠 Context Manager
+    participant DM as 📄 Document Mode
+    participant IM as 🖼️ Image Mode
+    participant VM as 🎤 Voice Mode
+    participant AI as 🧠 AI Engine
+
+    alt Отправка документа
+        U->>MD: Загружает документ
+        MD->>CM: Переключить в Document Mode
+        CM->>DM: Активировать режим документа
+        DM->>DM: Парсинг и индексация
+        DM->>U: "Документ загружен. Режим работы с документом активирован"
+        
+        loop Работа с документом
+            U->>DM: Вопрос по документу
+            DM->>AI: Запрос с контекстом документа
+            AI-->>DM: Ответ на основе документа
+            DM->>U: Ответ с ссылками на разделы
+            
+            alt Редактирование
+                U->>DM: "Измени раздел X"
+                DM->>AI: Запрос на редактирование
+                AI-->>DM: Предложенные изменения
+                DM->>DM: Создать новую версию
+                DM->>U: Показать изменения + версия
+            end
+        end
+        
+        U->>DM: "Экспортировать документ"
+        DM->>U: Готовый файл для скачивания
+    
+    else Отправка изображения
+        U->>MD: Загружает изображение
+        MD->>CM: Переключить в Image Mode
+        CM->>IM: Активировать режим изображений
+        IM->>AI: Анализ изображения
+        AI-->>IM: Описание изображения
+        IM->>U: Описание + возможности
+        
+        U->>IM: Вопрос об изображении
+        IM->>AI: Запрос с изображением в контексте
+        AI-->>IM: Ответ об изображении
+        IM->>U: Детальный ответ
+    
+    else Голосовое сообщение
+        U->>MD: Отправляет голос
+        MD->>CM: Переключить в Voice Mode
+        CM->>VM: Активировать голосовой режим
+        VM->>AI: Speech-to-Text + анализ
+        AI-->>VM: Текстовый ответ
+        VM->>VM: Text-to-Speech
+        VM->>U: Голосовой ответ
+    
+    else Обычный текст
+        U->>MD: Печатает текст
+        MD->>CM: Обычный режим
+        CM->>AI: Стандартный запрос
+        AI-->>CM: Обычный ответ
+        CM->>U: Текстовый ответ
     end
 ```
