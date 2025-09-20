@@ -50,6 +50,24 @@ graph TB
         ONBOARDING[🎯 Onboarding System<br/>GIF + Tutorial]
     end
 
+    %% Детальная обработка контента
+    subgraph "Обработка типов сообщений"
+        TEXT_HANDLER[📝 Текстовые сообщения]
+        VOICE_HANDLER[🎤 Голосовые сообщения<br/>Speech-to-Text]
+        PHOTO_HANDLER[🖼️ Изображения<br/>GPT-4 Vision]
+        DOC_HANDLER[📄 Документы<br/>PDF, DOCX парсинг]
+        VIDEO_HANDLER[🎬 Видео<br/>Извлечение кадров]
+        STICKER_HANDLER[😀 Стикеры]
+    end
+
+    %% Системы преобразования
+    subgraph "Преобразование контента"
+        STT_ENGINE[🗣️ Speech-to-Text<br/>Whisper API]
+        TTS_ENGINE[🔊 Text-to-Speech<br/>Генерация голоса]
+        VISION_ENGINE[👁️ Computer Vision<br/>Анализ изображений]
+        DOC_PARSER_ENGINE[📋 Document Parser<br/>Извлечение текста]
+    end
+
     %% ИИ и внешние сервисы
     subgraph "ИИ сервисы"
         OPENAI[🧠 OpenAI GPT-4]
@@ -64,6 +82,24 @@ graph TB
     subgraph "Управление контекстом"
         REDIS[📦 Redis<br/>Контекст диалогов]
         GLOBAL[🌐 Global.py<br/>Глобальное состояние]
+        CONTEXT_MANAGER[🧠 Context Manager<br/>Управление историей ИИ]
+        SYSTEM_PROMPTS[⚙️ System Prompts<br/>Командные промпты]
+    end
+
+    %% Векторные базы знаний
+    subgraph "Векторные базы знаний"
+        USER_KNOWLEDGE[👤 Персональная БЗ<br/>Данные пользователя]
+        COMPANY_KNOWLEDGE[🏢 Корпоративная БЗ<br/>База знаний компании]
+        VECTOR_SEARCH[🔍 Vector Search<br/>Семантический поиск]
+        EMBEDDINGS[📊 Embeddings<br/>Векторизация текста]
+    end
+
+    %% Система извлечения знаний
+    subgraph "Извлечение знаний"
+        KNOWLEDGE_EXTRACTOR[🧩 Knowledge Extractor<br/>Автоизвлечение данных]
+        USER_PROFILER[📋 User Profiler<br/>Профилирование пользователя]
+        FALLBACK_SEARCH[🔄 Fallback Search<br/>Поиск при незнании]
+        RAG_SYSTEM[🔗 RAG System<br/>Retrieval-Augmented Generation]
     end
 
     %% Система оплаты
@@ -134,6 +170,31 @@ graph TB
     HANDLERS --> COMMANDS
     HANDLERS --> CALLBACKS
 
+    %% Детальная обработка сообщений
+    CONTENT --> TEXT_HANDLER
+    CONTENT --> VOICE_HANDLER
+    CONTENT --> PHOTO_HANDLER
+    CONTENT --> DOC_HANDLER
+    CONTENT --> VIDEO_HANDLER
+    CONTENT --> STICKER_HANDLER
+
+    %% Связи с системами преобразования
+    VOICE_HANDLER --> STT_ENGINE
+    PHOTO_HANDLER --> VISION_ENGINE
+    DOC_HANDLER --> DOC_PARSER_ENGINE
+    VIDEO_HANDLER --> VISION_ENGINE
+
+    %% Связи с ИИ
+    TEXT_HANDLER --> OPENAI
+    TEXT_HANDLER --> CLAUDE
+    STT_ENGINE --> OPENAI
+    VISION_ENGINE --> OPENAI
+    DOC_PARSER_ENGINE --> OPENAI
+
+    %% TTS для ответов
+    OPENAI --> TTS_ENGINE
+    CLAUDE --> TTS_ENGINE
+
     %% Mini App связи
     MINIAPP --> MINIAPP_SETTINGS
     MINIAPP --> MINIAPP_CONTEXT
@@ -158,6 +219,13 @@ graph TB
     MAIN --> REDIS
     HANDLERS --> GLOBAL
     GLOBAL --> REDIS
+    
+    %% Связи с системой контекста
+    HANDLERS --> CONTEXT_MANAGER
+    CONTEXT_MANAGER --> REDIS
+    CONTEXT_MANAGER --> SYSTEM_PROMPTS
+    SYSTEM_PROMPTS --> OPENAI
+    SYSTEM_PROMPTS --> CLAUDE
 
     %% Связи с системой оплаты
     CALLBACKS --> YOOKASSA
@@ -193,6 +261,32 @@ graph TB
     HANDLERS --> INVOICE
     HANDLERS --> YOUTUBE
 
+    %% Связи с векторными базами знаний
+    HANDLERS --> KNOWLEDGE_EXTRACTOR
+    KNOWLEDGE_EXTRACTOR --> USER_PROFILER
+    USER_PROFILER --> USER_KNOWLEDGE
+    
+    %% Автонаполнение персональной БЗ
+    TEXT_HANDLER --> KNOWLEDGE_EXTRACTOR
+    VOICE_HANDLER --> KNOWLEDGE_EXTRACTOR
+    
+    %% Векторизация и поиск
+    USER_KNOWLEDGE --> EMBEDDINGS
+    COMPANY_KNOWLEDGE --> EMBEDDINGS
+    EMBEDDINGS --> VECTOR_SEARCH
+    
+    %% RAG система
+    OPENAI --> FALLBACK_SEARCH
+    CLAUDE --> FALLBACK_SEARCH
+    FALLBACK_SEARCH --> VECTOR_SEARCH
+    VECTOR_SEARCH --> RAG_SYSTEM
+    RAG_SYSTEM --> OPENAI
+    RAG_SYSTEM --> CLAUDE
+    
+    %% Связи с базами данных
+    USER_KNOWLEDGE --> USERS_DB
+    COMPANY_KNOWLEDGE --> DATA_DB
+
     %% Стили
     classDef userClass fill:#e1f5fe,stroke:#01579b,stroke-width:2px
     classDef botClass fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
@@ -203,6 +297,11 @@ graph TB
     classDef serviceClass fill:#f1f8e9,stroke:#33691e,stroke-width:2px
     classDef tariffClass fill:#fff8e1,stroke:#ff8f00,stroke-width:2px
     classDef docClass fill:#fafafa,stroke:#424242,stroke-width:2px
+    classDef handlerClass fill:#e8eaf6,stroke:#3f51b5,stroke-width:2px
+    classDef engineClass fill:#f9fbe7,stroke:#689f38,stroke-width:2px
+    classDef contextClass fill:#fce4ec,stroke:#ad1457,stroke-width:2px
+    classDef knowledgeClass fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+    classDef ragClass fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
     
     class U1,U2 userClass
     class MAIN,HANDLERS,RUN,ONBOARDING botClass
@@ -213,6 +312,11 @@ graph TB
     class SHOPME,PRESENTATIONS,GHIBLI,ANTIPLAGIAT serviceClass
     class TRIAL,TARIFF_99,TARIFF_199,TARIFF_399,TARIFF_1890 tariffClass
     class DOC_PROCESSOR,EXCEL_GEN,PDF_GEN,DOCX_GEN,TABLE_PARSER docClass
+    class TEXT_HANDLER,VOICE_HANDLER,PHOTO_HANDLER,DOC_HANDLER,VIDEO_HANDLER,STICKER_HANDLER handlerClass
+    class STT_ENGINE,TTS_ENGINE,VISION_ENGINE,DOC_PARSER_ENGINE engineClass
+    class CONTEXT_MANAGER,SYSTEM_PROMPTS contextClass
+    class USER_KNOWLEDGE,COMPANY_KNOWLEDGE,VECTOR_SEARCH,EMBEDDINGS knowledgeClass
+    class KNOWLEDGE_EXTRACTOR,USER_PROFILER,FALLBACK_SEARCH,RAG_SYSTEM ragClass
 ```
 
 ## Детализация системы обработки сообщений
@@ -487,4 +591,319 @@ graph TB
     class EXCEL_GENERATOR,PDF_GENERATOR,DOCX_GENERATOR,POWERPOINT_GEN generatorClass
     class DOCUMENT_FILE,DOWNLOAD_LINK,TELEGRAM_FILE outputClass
     class LEGACY_PARSER legacyClass
+```
+
+## Схема обработки типов сообщений
+
+```mermaid
+graph TB
+    subgraph "Входящие сообщения"
+        TEXT_MSG[📝 Текстовое сообщение]
+        VOICE_MSG[🎤 Голосовое сообщение]
+        PHOTO_MSG[🖼️ Изображение/Фото]
+        DOC_MSG[📄 Документ]
+        VIDEO_MSG[🎬 Видео]
+        STICKER_MSG[😀 Стикер]
+    end
+
+    subgraph "Предобработка"
+        MSG_ROUTER[🔀 Маршрутизатор сообщений<br/>Определение типа]
+        VOICE_TO_TEXT[🗣️ Speech-to-Text<br/>Whisper API]
+        IMAGE_ANALYZER[👁️ Анализ изображений<br/>GPT-4 Vision]
+        DOC_PARSER[📋 Парсер документов<br/>PDF, DOCX, TXT]
+        VIDEO_PROCESSOR[🎞️ Обработка видео<br/>Извлечение кадров]
+    end
+
+    subgraph "ИИ обработка"
+        TEXT_AI[🧠 Текстовый ИИ<br/>GPT-4, Claude, DeepSeek]
+        VISION_AI[👀 Vision ИИ<br/>Анализ изображений]
+        MULTIMODAL_AI[🔄 Мультимодальный ИИ<br/>Текст + изображение]
+    end
+
+    subgraph "Генерация ответов"
+        TEXT_RESPONSE[📝 Текстовый ответ]
+        VOICE_RESPONSE[🔊 Голосовой ответ<br/>Text-to-Speech]
+        IMAGE_GENERATION[🎨 Генерация изображения<br/>DALL-E, Stable Diffusion]
+        DOC_GENERATION[📄 Генерация документа<br/>PDF, DOCX, Excel]
+    end
+
+    subgraph "Отправка пользователю"
+        SEND_TEXT[📤 Отправить текст]
+        SEND_VOICE[📤 Отправить аудио]
+        SEND_IMAGE[📤 Отправить изображение]
+        SEND_DOCUMENT[📤 Отправить документ]
+    end
+
+    %% Routing
+    TEXT_MSG --> MSG_ROUTER
+    VOICE_MSG --> MSG_ROUTER
+    PHOTO_MSG --> MSG_ROUTER
+    DOC_MSG --> MSG_ROUTER
+    VIDEO_MSG --> MSG_ROUTER
+    STICKER_MSG --> MSG_ROUTER
+
+    %% Processing paths
+    MSG_ROUTER --> VOICE_TO_TEXT
+    MSG_ROUTER --> IMAGE_ANALYZER
+    MSG_ROUTER --> DOC_PARSER
+    MSG_ROUTER --> VIDEO_PROCESSOR
+
+    %% Text processing
+    TEXT_MSG --> TEXT_AI
+    VOICE_TO_TEXT --> TEXT_AI
+
+    %% Image processing
+    IMAGE_ANALYZER --> VISION_AI
+    PHOTO_MSG --> VISION_AI
+
+    %% Document processing
+    DOC_PARSER --> TEXT_AI
+
+    %% Video processing
+    VIDEO_PROCESSOR --> VISION_AI
+
+    %% Multimodal processing
+    TEXT_AI --> MULTIMODAL_AI
+    VISION_AI --> MULTIMODAL_AI
+
+    %% Response generation
+    TEXT_AI --> TEXT_RESPONSE
+    TEXT_AI --> VOICE_RESPONSE
+    TEXT_AI --> IMAGE_GENERATION
+    TEXT_AI --> DOC_GENERATION
+
+    VISION_AI --> TEXT_RESPONSE
+    MULTIMODAL_AI --> TEXT_RESPONSE
+
+    %% Sending responses
+    TEXT_RESPONSE --> SEND_TEXT
+    VOICE_RESPONSE --> SEND_VOICE
+    IMAGE_GENERATION --> SEND_IMAGE
+    DOC_GENERATION --> SEND_DOCUMENT
+
+    %% Styling
+    classDef inputClass fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef processClass fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef aiClass fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef responseClass fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef outputClass fill:#ffebee,stroke:#c62828,stroke-width:2px
+    
+    class TEXT_MSG,VOICE_MSG,PHOTO_MSG,DOC_MSG,VIDEO_MSG,STICKER_MSG inputClass
+    class MSG_ROUTER,VOICE_TO_TEXT,IMAGE_ANALYZER,DOC_PARSER,VIDEO_PROCESSOR processClass
+    class TEXT_AI,VISION_AI,MULTIMODAL_AI aiClass
+    class TEXT_RESPONSE,VOICE_RESPONSE,IMAGE_GENERATION,DOC_GENERATION responseClass
+    class SEND_TEXT,SEND_VOICE,SEND_IMAGE,SEND_DOCUMENT outputClass
+```
+
+## Детальная схема обработки сообщений по типам
+
+```mermaid
+sequenceDiagram
+    participant U as 👤 Пользователь
+    participant TG as 📱 Telegram
+    participant R as 🔀 Router
+    participant P as 🔄 Preprocessor
+    participant AI as 🧠 AI Engine
+    participant G as 🎨 Generator
+    participant DB as 💾 Database
+
+    alt Текстовое сообщение
+        U->>TG: Печатает текст
+        TG->>R: Текстовое сообщение
+        R->>AI: Прямо в ИИ
+        AI->>G: Генерация ответа
+        G->>TG: Текстовый ответ
+        G->>DB: Сохранить в контекст
+        TG->>U: Получает ответ
+    
+    else Голосовое сообщение
+        U->>TG: Записывает голос
+        TG->>R: Аудио файл
+        R->>P: Speech-to-Text
+        P->>AI: Текст из голоса
+        AI->>G: Генерация ответа
+        alt Текстовый ответ
+            G->>TG: Текст
+        else Голосовой ответ
+            G->>P: Text-to-Speech
+            P->>TG: Аудио файл
+        end
+        G->>DB: Сохранить в контекст
+        TG->>U: Получает ответ
+    
+    else Изображение
+        U->>TG: Отправляет фото
+        TG->>R: Изображение
+        R->>P: Анализ изображения
+        P->>AI: Описание изображения
+        AI->>G: Генерация ответа
+        alt Текстовое описание
+            G->>TG: Описание изображения
+        else Генерация нового изображения
+            G->>P: Создать изображение
+            P->>TG: Новое изображение
+        end
+        G->>DB: Сохранить в контекст
+        TG->>U: Получает ответ
+    
+    else Документ
+        U->>TG: Загружает файл
+        TG->>R: PDF/DOCX/TXT
+        R->>P: Парсинг документа
+        P->>AI: Извлеченный текст
+        AI->>G: Анализ документа
+        alt Текстовый анализ
+            G->>TG: Анализ содержимого
+        else Создание нового документа
+            G->>P: Генерация документа
+            P->>TG: Новый файл
+        end
+        G->>DB: Сохранить в контекст
+        TG->>U: Получает результат
+    end
+```
+
+## Система управления контекстом и базами знаний
+
+```mermaid
+graph TB
+    subgraph "Контекст нейросети"
+        DIALOG_HISTORY[💬 История диалога<br/>Вопросы + Ответы ИИ]
+        USER_PROMPT[👤 Промпт пользователя<br/>Текущий запрос]
+        SYSTEM_PROMPT[⚙️ System промпт<br/>Командное управление]
+        CONTEXT_WINDOW[🪟 Context Window<br/>Окно контекста ИИ]
+    end
+
+    subgraph "Персональная база знаний"
+        USER_NAME[👤 Имя пользователя]
+        USER_PREFERENCES[⚙️ Предпочтения]
+        USER_HISTORY[📚 История взаимодействий]
+        USER_SKILLS[🎯 Навыки и интересы]
+        USER_PROJECTS[📋 Проекты пользователя]
+        AUTO_EXTRACTOR[🔍 Автоизвлечение<br/>Из диалогов]
+    end
+
+    subgraph "Корпоративная база знаний"
+        COMPANY_DOCS[📄 Документация]
+        FAQ_BASE[❓ База FAQ]
+        PRODUCT_INFO[📦 Информация о продуктах]
+        POLICIES[📋 Политики и процедуры]
+        KNOWLEDGE_ADMIN[👨‍💼 Администрирование БЗ]
+    end
+
+    subgraph "Векторный поиск"
+        EMBEDDING_MODEL[🧠 Embedding модель<br/>text-embedding-3-large]
+        VECTOR_DB[🗄️ Векторная БД<br/>Pinecone/Chroma/Weaviate]
+        SIMILARITY_SEARCH[🔍 Similarity Search<br/>Cosine similarity]
+        RELEVANCE_FILTER[🎯 Фильтр релевантности<br/>Threshold scoring]
+    end
+
+    subgraph "RAG Pipeline"
+        QUERY_ANALYZER[🔍 Анализатор запроса<br/>Определение намерений]
+        KNOWLEDGE_RETRIEVER[📚 Knowledge Retriever<br/>Поиск релевантной информации]
+        CONTEXT_ENRICHER[➕ Context Enricher<br/>Обогащение контекста]
+        RESPONSE_GENERATOR[🤖 Response Generator<br/>Генерация с учетом БЗ]
+    end
+
+    %% Формирование контекста
+    USER_PROMPT --> CONTEXT_WINDOW
+    SYSTEM_PROMPT --> CONTEXT_WINDOW
+    DIALOG_HISTORY --> CONTEXT_WINDOW
+
+    %% Автонаполнение персональной БЗ
+    DIALOG_HISTORY --> AUTO_EXTRACTOR
+    AUTO_EXTRACTOR --> USER_NAME
+    AUTO_EXTRACTOR --> USER_PREFERENCES
+    AUTO_EXTRACTOR --> USER_HISTORY
+    AUTO_EXTRACTOR --> USER_SKILLS
+    AUTO_EXTRACTOR --> USER_PROJECTS
+
+    %% Векторизация данных
+    USER_NAME --> EMBEDDING_MODEL
+    USER_PREFERENCES --> EMBEDDING_MODEL
+    USER_HISTORY --> EMBEDDING_MODEL
+    USER_SKILLS --> EMBEDDING_MODEL
+    USER_PROJECTS --> EMBEDDING_MODEL
+
+    COMPANY_DOCS --> EMBEDDING_MODEL
+    FAQ_BASE --> EMBEDDING_MODEL
+    PRODUCT_INFO --> EMBEDDING_MODEL
+    POLICIES --> EMBEDDING_MODEL
+
+    EMBEDDING_MODEL --> VECTOR_DB
+
+    %% RAG процесс
+    USER_PROMPT --> QUERY_ANALYZER
+    QUERY_ANALYZER --> KNOWLEDGE_RETRIEVER
+    KNOWLEDGE_RETRIEVER --> VECTOR_DB
+    VECTOR_DB --> SIMILARITY_SEARCH
+    SIMILARITY_SEARCH --> RELEVANCE_FILTER
+    RELEVANCE_FILTER --> CONTEXT_ENRICHER
+    CONTEXT_ENRICHER --> CONTEXT_WINDOW
+    CONTEXT_WINDOW --> RESPONSE_GENERATOR
+
+    %% Стили
+    classDef contextClass fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef personalClass fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef companyClass fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef vectorClass fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef ragClass fill:#ffebee,stroke:#c62828,stroke-width:2px
+    
+    class DIALOG_HISTORY,USER_PROMPT,SYSTEM_PROMPT,CONTEXT_WINDOW contextClass
+    class USER_NAME,USER_PREFERENCES,USER_HISTORY,USER_SKILLS,USER_PROJECTS,AUTO_EXTRACTOR personalClass
+    class COMPANY_DOCS,FAQ_BASE,PRODUCT_INFO,POLICIES,KNOWLEDGE_ADMIN companyClass
+    class EMBEDDING_MODEL,VECTOR_DB,SIMILARITY_SEARCH,RELEVANCE_FILTER vectorClass
+    class QUERY_ANALYZER,KNOWLEDGE_RETRIEVER,CONTEXT_ENRICHER,RESPONSE_GENERATOR ragClass
+```
+
+## Схема работы с контекстом и знаниями
+
+```mermaid
+sequenceDiagram
+    participant U as 👤 Пользователь
+    participant CM as 🧠 Context Manager
+    participant KE as 🔍 Knowledge Extractor
+    participant VDB as 🗄️ Vector DB
+    participant RAG as 🤖 RAG System
+    participant AI as 🧠 AI Model
+
+    alt Новый пользователь
+        U->>CM: Первое сообщение
+        CM->>KE: Извлечь данные пользователя
+        KE->>VDB: Создать профиль
+        Note over VDB: Автоматически сохраняется:<br/>имя, предпочтения, интересы
+        VDB-->>CM: Профиль создан
+    
+    else Обычный запрос
+        U->>CM: Отправляет сообщение
+        CM->>KE: Обновить профиль
+        KE->>VDB: Добавить новые данные
+        
+        CM->>RAG: Анализ запроса
+        RAG->>VDB: Поиск в персональной БЗ
+        RAG->>VDB: Поиск в корпоративной БЗ
+        VDB-->>RAG: Релевантная информация
+        
+        RAG->>CM: Обогащенный контекст
+        CM->>AI: Запрос с контекстом + БЗ
+        AI-->>CM: Персонализированный ответ
+        CM-->>U: Ответ с учетом истории
+    
+    else ИИ не знает ответ
+        U->>CM: Сложный вопрос
+        CM->>AI: Обычный запрос
+        AI-->>CM: "Не знаю"
+        
+        CM->>RAG: Fallback поиск
+        RAG->>VDB: Глубокий поиск в БЗ
+        VDB-->>RAG: Найденная информация
+        
+        alt Информация найдена
+            RAG->>AI: Повторный запрос + найденные данные
+            AI-->>CM: Ответ на основе БЗ
+            CM-->>U: Информативный ответ
+        else Информация не найдена
+            CM-->>U: Извинение + предложение помощи
+        end
+    end
 ```
